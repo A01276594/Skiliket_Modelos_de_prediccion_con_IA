@@ -35,7 +35,7 @@ for device_dir in BASE_DIR.iterdir():
         if df_var.empty:
             continue
 
-        out_path = variables_dir / f"{col}_.csv"
+        out_path = variables_dir / f"{col}_{device_id}.csv"
         df_var.to_csv(f"{out_path}", index=False)
 
     print(f"✅ Variables creadas en {variables_dir}")
