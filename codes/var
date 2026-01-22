@@ -1,0 +1,41 @@
+import pandas as pd
+from pathlib import Path
+
+BASE_DIR = Path("data/devices")
+
+for device_dir in BASE_DIR.iterdir():
+    if not device_dir.is_dir() or not device_dir.name.startswith("device_"):
+        continue
+
+    device_id = device_dir.name.split("_")[1]
+    pivot_file = device_dir / f"pivot_{device_id}.csv"
+
+    if not pivot_file.exists():
+        print(f"⚠️ No existe {pivot_file}")
+        continue
+
+    print(f"Procesando {pivot_file}")
+
+    df = pd.read_csv(pivot_file)
+    df["Time"] = pd.to_datetime(df["Time"], errors="coerce")
+
+    # crear carpeta variables
+    variables_dir = device_dir / "variables"
+    variables_dir.mkdir(exist_ok=True)
+
+    # columnas que NO son variables
+    ignore_cols = {"Time", "device_id"}
+
+    for col in df.columns:
+        if col in ignore_cols:
+            continue
+
+        df_var = df[["Time", col]].dropna()
+
+        if df_var.empty:
+            continue
+
+        out_path = variables_dir / f"{col}_.csv"
+        df_var.to_csv(f"{out_path}", index=False)
+
+    print(f"✅ Variables creadas en {variables_dir}")
