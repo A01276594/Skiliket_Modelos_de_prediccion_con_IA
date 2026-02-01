@@ -4,7 +4,14 @@ from xgboost import XGBClassifier
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.class_weight import compute_sample_weight
+from dotenv import load_dotenv
+import os
+from utils.logger import Logger
+import joblib
 
+
+load_dotenv()
+BASE_PATH = os.getenv("RUTA_CSV")
 AGGRESSIVENESS = 3.0 
 
 def categorize_aqi(val) -> int:
@@ -93,7 +100,7 @@ def train_model(df) -> XGBClassifier:
         danger_indices = np.where(y_train == danger_idx_transformed)[0]
         weights[danger_indices] *= AGGRESSIVENESS
     else:
-        print("No hay aqi de calidad 3, 4 o 5")
+        Logger.warning("No hay aqi de calidad 3, 4 o 5")
     y_test = []
     known_classes = set(le.classes_)
     for label in y_test_raw:
@@ -113,22 +120,19 @@ def train_model(df) -> XGBClassifier:
     )    
     model.fit(X_train, y_train, sample_weight=weights)    
     preds = model.predict(X_test)
-    print("-" * 60)
-    print(f"Accuracy: {accuracy_score(y_test, preds)}")
-    print("-" * 60)
+    Logger.info(f"Accuracy: {accuracy_score(y_test, preds)}")
     class_names_map = {0: 'Verde (Seguro)', 1: 'Amarillo (Precaucion)', 2: 'Rojo (Peligro)'}
     target_names = [class_names_map.get(cls, str(cls)) for cls in le.classes_]
     try:
-        print(classification_report(y_test, preds, target_names=target_names))
+        Logger.info(classification_report(y_test, preds, target_names=target_names))
     except:
-        print(classification_report(y_test, preds))
-    print("-" * 60)
+        Logger.error(classification_report(y_test, preds))
     return model
 
 
 if __name__ == "__main__":
-    print("Iniciando entrenamiento")    
-    base_path = '/Users/victoralejandrorojasgamez/Downloads/tareas_tec/skiliket/Skiliket_Modelos_de_prediccion_con_IA/data/csvs/'
+    Logger.info("Iniciando entrenamiento")    
+    base_path = BASE_PATH
     try:
         df_eco2 = pd.read_csv(base_path + 'device_2_ECO2.csv')
         df_hum = pd.read_csv(base_path + 'device_1_Humidity.csv')
@@ -137,6 +141,7 @@ if __name__ == "__main__":
         main_df = prepare_data([df_eco2, df_hum, df_tvoc, df_aqi])
         final_df = create_features(main_df)
         my_model = train_model(final_df)
-        print("Modelo entrenado")
+        Logger.info("Modelo entrenado")
+        joblib.dump(my_model, 'modelo_aire.pkl')
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+        Logger.error(f"Ocurrió un error inesperado: {e}")

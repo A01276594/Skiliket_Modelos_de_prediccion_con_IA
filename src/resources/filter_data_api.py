@@ -1,8 +1,12 @@
 import requests
 import csv
 from typing import List, Dict
-BASE_URL = "https://app.skiliket.net/server/api/v1"
+from dotenv import load_dotenv
+import os
+from utils.logger import Logger
 
+load_dotenv()
+BASE_URL = os.getenv("URL_API")
 PERIODO_INICIO = "2025-01-07%2000:00:00"
 PERIODO_FINAL = "2026-01-14%2023:59:59"
 
@@ -83,7 +87,7 @@ def exportar_device_categoria_csv(device_id: int, categoria: str, data: List[Dic
                 item.get("created_at"),
                 item.get("updated_at")
             ])
-    print(f"CSV creado: {nombre_archivo}")
+    Logger.info(f"CSV creado: {nombre_archivo}")
 
 
 def exportar_todos_los_devices() -> None:
@@ -92,24 +96,24 @@ def exportar_todos_los_devices() -> None:
     Funcion principal para crear los csv de toda la info
     """
     for device_id in range(1, 11):
-        print(f"\nProcesando dispositivo: {device_id}")
+        Logger.info(f"\nProcesando dispositivo: {device_id}")
         try:
             categorias = obtener_measurements_types(device_id)
         except Exception as e:
-            print(f"Error obteniendo categorías: {e}")
+            Logger.error(f"Error obteniendo categorías: {e}")
             continue
         for categoria in categorias:
-            print(f"Medida: {categoria}")
+            Logger.info(f"Medida: {categoria}")
             try:
                 data = obtener_mediciones(device_id, categoria)
             except Exception as e:
-                print(f"Error obteniendo datos: {e}")
+                Logger.error(f"Error obteniendo datos: {e}")
                 continue
             if not isinstance(data, list):
-                print(f"Respuesta inesperada: {data}")
+                Logger.warning(f"Respuesta inesperada: {data}")
                 continue
             if not data:
-                print("Sin datos")
+                Logger.warning("Sin datos")
                 continue
             exportar_device_categoria_csv(device_id, categoria, data)
 
