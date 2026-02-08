@@ -11,15 +11,15 @@
 
 ## 📋 Descripción del Proyecto
 
-[cite_start]Este proyecto transforma la red de sensores Skiliket de un sistema de monitoreo pasivo a uno **proactivo**[cite: 894]. [cite_start]Utilizando un modelo de aprendizaje automático (**XGBoost**), el sistema analiza variables ambientales críticas (CO2, TVOC, Humedad) para predecir la calidad del aire con **30 minutos de antelación**[cite: 39, 46, 897, 898].
+Este proyecto transforma la red de sensores Skiliket de un sistema de monitoreo pasivo a uno **proactivo**. Utilizando un modelo de aprendizaje automático (**XGBoost**), el sistema analiza variables ambientales críticas (CO2, TVOC, Humedad) para predecir la calidad del aire con **30 minutos de antelación**.
 
-[cite_start]El sistema orquesta la extracción de datos, la inferencia del modelo y la notificación de alertas a **Microsoft Teams** de forma autónoma [cite: 215, 277][cite_start], permitiendo una gestión eficiente de la ventilación y protegiendo la salud de los ocupantes del campus[cite: 385, 898].
+El sistema orquesta la extracción de datos, la inferencia del modelo y la notificación de alertas a **Microsoft Teams** de forma autónoma, permitiendo una gestión eficiente de la ventilación y protegiendo la salud de los ocupantes del campus.
 
 ### 🎯 Propósito
-* [cite_start]**Vigilar:** Monitoreo 24/7 de los 10 dispositivos IoT distribuidos en el campus[cite: 221, 903].
-* [cite_start]**Predecir:** Anticipar condiciones de riesgo (Clasificación "Peligro") antes de que ocurran[cite: 384, 895].
-* [cite_start]**Alertar:** Notificaciones automáticas en tiempo real vía Webhooks de MS Teams[cite: 277, 916].
-* [cite_start]**Visualizar:** Dashboard interactivo para la toma de decisiones basada en datos[cite: 339, 919].
+* **Vigilar:** Monitoreo 24/7 de los 10 dispositivos IoT distribuidos en el campus.
+* **Predecir:** Anticipar condiciones de riesgo (Clasificación "Peligro") antes de que ocurran.
+* **Alertar:** Notificaciones automáticas en tiempo real vía Webhooks de MS Teams.
+* **Visualizar:** Dashboard interactivo para la toma de decisiones basada en datos.
 
 ---
 
@@ -28,18 +28,18 @@
 ```text
 .
 ├── extras/
-│   ├── data/                  # Datasets históricos y CSVs procesados [cite: 569, 904]
-│   └── notebooks/             # Exploración (EDA), limpieza y pruebas de modelos [cite: 10, 587]
+│   ├── data/                  # Datasets históricos y CSVs procesados 
+│   └── notebooks/             # Exploración (EDA), limpieza y pruebas de modelos 
 ├── src/
-│   ├── bot.py                 # Integración con Microsoft Teams (Adaptive Cards) [cite: 277, 940]
-│   ├── data.py                # Ingesta y conexión con API Skiliket [cite: 928]
-│   ├── model.py               # Lógica de ML: Feature engineering e inferencia [cite: 931]
-│   ├── dashboard.py           # Interfaz visual (Streamlit) [cite: 339, 411]
-│   ├── main.py                # Orquestador del flujo de trabajo [cite: 936]
-│   ├── deploy.py              # Configuración del despliegue (Prefect Scheduler) [cite: 936]
-│   └── utils/                 # Configuración y logging [cite: 329, 925]
+│   ├── bot.py                 # Integración con Microsoft Teams (Adaptive Cards) 
+│   ├── data.py                # Ingesta y conexión con API Skiliket
+│   ├── model.py               # Lógica de ML: Feature engineering e inferencia 
+│   ├── dashboard.py           # Interfaz visual (Streamlit) 
+│   ├── main.py                # Orquestador del flujo de trabajo 
+│   ├── deploy.py              # Configuración del despliegue (Prefect Scheduler) 
+│   └── utils/                 # Configuración y logging
 ├── requirements.txt           # Dependencias del proyecto
-└── README.md                  # Documentación
+└── README.md                  # Este archivo
 ```
 
 ## ⚙️ Arquitectura y Metodología
