@@ -1,309 +1,183 @@
-# Skiliket - Modelos de Predicción con IA
+# 🌳 Skiliket - Sistema de Predicción Ambiental con IA
 
-## Descripción del Proyecto
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
+![Prefect](https://img.shields.io/badge/Prefect-Orchestration-orange)
+![XGBoost](https://img.shields.io/badge/ML-XGBoost-green)
 
-Sistema de predicción basado en inteligencia artificial para anticipar tendencias ambientales utilizando datos históricos de dispositivos IoT Skiliket. El proyecto implementa un modelo de machine learning que analiza variables ambientales para generar alertas y recomendaciones proactivas, ayudando en la toma de decisiones sostenibles.
-
-### Pregunta Guía
-**¿Cómo puede la IA predecir comportamientos ambientales y apoyar la toma de decisiones sostenibles?**
-
----
-
-## Propósito
-
-Explorar el uso de inteligencia artificial para:
-- Anticipar tendencias ambientales
-- Generar alertas tempranas basadas en patrones históricos
-- Proporcionar recomendaciones para decisiones sostenibles
-- Visualizar predicciones en tiempo real mediante un dashboard interactivo
+**Predicción proactiva de calidad del aire y alertas automatizadas mediante IoT y Machine Learning.**
 
 ---
 
-## Estructura del Proyecto
+## 📋 Descripción del Proyecto
 
-```
+[cite_start]Este proyecto transforma la red de sensores Skiliket de un sistema de monitoreo pasivo a uno **proactivo**[cite: 894]. [cite_start]Utilizando un modelo de aprendizaje automático (**XGBoost**), el sistema analiza variables ambientales críticas (CO2, TVOC, Humedad) para predecir la calidad del aire con **30 minutos de antelación**[cite: 39, 46, 897, 898].
+
+[cite_start]El sistema orquesta la extracción de datos, la inferencia del modelo y la notificación de alertas a **Microsoft Teams** de forma autónoma [cite: 215, 277][cite_start], permitiendo una gestión eficiente de la ventilación y protegiendo la salud de los ocupantes del campus[cite: 385, 898].
+
+### 🎯 Propósito
+* [cite_start]**Vigilar:** Monitoreo 24/7 de los 10 dispositivos IoT distribuidos en el campus[cite: 221, 903].
+* [cite_start]**Predecir:** Anticipar condiciones de riesgo (Clasificación "Peligro") antes de que ocurran[cite: 384, 895].
+* [cite_start]**Alertar:** Notificaciones automáticas en tiempo real vía Webhooks de MS Teams[cite: 277, 916].
+* [cite_start]**Visualizar:** Dashboard interactivo para la toma de decisiones basada en datos[cite: 339, 919].
+
+---
+
+## 📂 Estructura del Repositorio
+
+```text
 .
 ├── extras/
-│   ├── data/
-│   │   ├── csvs/              # Archivos CSV generales
-│   │   ├── devices/           # Datos por dispositivo
-│   │   │   ├── device_1/
-│   │   │   │   ├── variables/ # Variables específicas del dispositivo
-│   │   │   │   ├── pivot_1.csv
-│   │   │   │   └── pivot_1_min.csv
-│   │   │   ├── device_2/
-│   │   │   └── ...
-│   │   ├── var/               # Datos de variables
-│   │   └── other/             # Otros datos
-│   └── notebooks/
-│       ├── Visualización/     # Notebooks de visualización
-│       └── devices_cleaning/  # Notebooks de limpieza de datos
+│   ├── data/                  # Datasets históricos y CSVs procesados [cite: 569, 904]
+│   └── notebooks/             # Exploración (EDA), limpieza y pruebas de modelos [cite: 10, 587]
 ├── src/
-│   ├── resources/             # Recursos del proyecto
-│   ├── utils/                 # Utilidades y funciones auxiliares
-│   ├── bot.py                 # Bot de alertas (si aplica)
-│   ├── dashboard.py           # Dashboard de Streamlit
-│   ├── data.py                # Procesamiento de datos
-│   ├── deploy.py              # Script de despliegue
-│   ├── main.py                # Punto de entrada principal
-│   └── model.py               # Definición y entrenamiento del modelo
+│   ├── bot.py                 # Integración con Microsoft Teams (Adaptive Cards) [cite: 277, 940]
+│   ├── data.py                # Ingesta y conexión con API Skiliket [cite: 928]
+│   ├── model.py               # Lógica de ML: Feature engineering e inferencia [cite: 931]
+│   ├── dashboard.py           # Interfaz visual (Streamlit) [cite: 339, 411]
+│   ├── main.py                # Orquestador del flujo de trabajo [cite: 936]
+│   ├── deploy.py              # Configuración del despliegue (Prefect Scheduler) [cite: 936]
+│   └── utils/                 # Configuración y logging [cite: 329, 925]
 ├── requirements.txt           # Dependencias del proyecto
-└── README.md                  # Este archivo
+└── README.md                  # Documentación
 ```
 
----
+## ⚙️ Arquitectura y Metodología
 
-##  Proceso de Desarrollo
+### 1. Pipeline de Datos (ETL)
 
-### 1 Preparación de Dataset
-**Objetivo:** Recopilación y limpieza de datos históricos ambientales
+**Ingesta**  
+Conexión a la API de Skiliket para extraer ventanas móviles de datos de los últimos **60 min**.
 
-**Actividades realizadas:**
-- Extracción de datos de dispositivos IoT Skiliket
-- Organización de datos por dispositivo en estructura jerárquica
-- Limpieza y preprocesamiento de datos (notebooks en `extras/notebooks/devices_cleaning/`)
-- Generación de tablas pivote para análisis temporal
-- Creación de versiones minimizadas de datos para optimización
+**Limpieza**  
+Filtrado automático de ruido de hardware para lecturas anómalas superiores a **5000 ppm**.
 
-**Resultados:**
-- Dataset estructurado por dispositivos
-- Variables ambientales normalizadas
-- Datos listos para entrenamiento del modelo
+**Transformación**  
+Generación de *lags* temporales (**t-15 min**) y promedios móviles para capturar la inercia del sistema.
 
 ---
 
-### 2 Selección y Entrenamiento de Modelo
-**Objetivo:** Implementar un modelo de ML para predicciones ambientales
+### 2. Modelo de Predicción (Core ML)
 
-**Decisiones técnicas:**
-- **Algoritmo seleccionado:** XGBoost (Extreme Gradient Boosting)
-  - Razón: Excelente desempeño con datos tabulares
-  - Capacidad para manejar relaciones no lineales
-  - Robusto ante datos faltantes
-  
-- **División de datos:** 80/20 (Train/Test)
-  - 80% para entrenamiento
-  - 20% para validación
+**Algoritmo**  
+XGBoost (*Extreme Gradient Boosting*).
 
-**Tipo de modelo:** Regresión/Series temporales (según el objetivo específico de predicción)
+**Estrategia**  
+Clasificación de riesgo en **3 niveles**:
+- 🟢 Verde — Seguro  
+- 🟡 Amarillo — Precaución  
+- 🔴 Rojo — Peligro  
 
-**Implementación:**
-- Código principal en `src/model.py`
-- Entrenamiento y evaluación documentados
-- Guardado de modelo para inferencia
+**Entrenamiento**  
+Datos históricos divididos en:
+- **80%** entrenamiento  
+- **20%** evaluación  
 
-**Resultados del primer entrenamiento:**
-- Modelo base funcional
-- Métricas de evaluación registradas
-- **Nota importante:** Los datos actuales presentan limitaciones de precisión que requieren mejoras
+Se utilizó ponderación de muestras para penalizar errores en la clase crítica de peligro.
 
 ---
 
-### 3 Sistema de Alertas
-**Objetivo:** Implementar lógica para detección de tendencias negativas
+### 3. Automatización y Alertas
 
-**Componentes:**
-- Sistema de alertas basado en umbrales
-- Programación de recomendaciones automáticas
-- Integración con el modelo predictivo
+**Orquestación**  
+Implementación de **Prefect** para ejecutar el flujo de análisis cada **30 minutos**.
 
-**Estado actual:**
-- Lógica básica de alertas implementada
-- Requiere calibración de umbrales con más datos
+**Notificaciones**  
+Envío de tarjetas adaptativas a **Microsoft Teams** cuando se detecta una predicción de **Clase 2 (Peligro)**.
 
 ---
 
-### 4 Dashboard de Predicciones
-**Objetivo:** Visualización interactiva de predicciones en tiempo real
+### 4. Visualización
 
-**Tecnología:** Streamlit
-
-**Características implementadas:**
-- Visualización de tendencias proyectadas
-- Actualización en tiempo real (simulado)
-- Interfaz intuitiva para usuarios no técnicos
-- Documentación de cómo la IA apoya decisiones
-
-**Acceso:** `streamlit run src/dashboard.py`
+**Dashboard**  
+Construido en **Streamlit**, presenta el estado actual de los sensores y proyecciones a futuro.  
+Incluye explicaciones interpretativas del modelo para facilitar la toma de decisiones.
 
 ---
 
-## Tecnologías Utilizadas
-
-### Core ML/Data Science
-- **XGBoost** - Modelo de gradient boosting
-- **pandas** - Manipulación de datos
-- **numpy** - Operaciones numéricas
-- **scikit-learn** - Herramientas de ML (preprocessing, métricas)
-
-### Visualización y Dashboard
-- **Streamlit** - Framework para dashboard interactivo
-- **matplotlib/seaborn** - Gráficos estáticos
-
-### Otros
-- **Python 3.x** - Lenguaje base
-- Ver `requirements.txt` para dependencias completas
-
----
-
-## Instalación y Uso
+## 🚀 Instalación y Despliegue
 
 ### Prerrequisitos
-```bash
-python 3.8+
-pip
-```
+- Python **3.9** o superior  
+- Acceso a la API de Skiliket  
+- Webhook de canal de Microsoft Teams  
 
-### Instalación
+### Pasos de Instalación
 
-1. Clonar el repositorio:
+**Clonar el repositorio**
 ```bash
 git clone https://github.com/A01276594/Skiliket_Modelos_de_prediccion_con_IA.git
 cd Skiliket_Modelos_de_prediccion_con_IA
 ```
 
-2. Instalar dependencias:
+**Instalar dependencias**
 ```bash
 pip install -r requirements.txt
 ```
 
-### Ejecución
+**Configurar Variables de Entorno**  
+Crea un archivo `.env` en la raíz del proyecto con las siguientes claves:
 
-**Entrenar el modelo:**
-```bash
-python src/model.py
+```env
+RUTA_CSV=
+URL_API=
+WEBHOOK_TEAMS=
+MODEL_PATH=
+DASHBOARD_URL=
 ```
 
-**Lanzar el dashboard:**
+---
+
+## ▶️ Ejecución
+
+### Modo Dashboard (Visualización)
+Para ver las gráficas y el estado del sistema en tiempo real:
+
 ```bash
 streamlit run src/dashboard.py
 ```
 
-**Ejecutar pipeline completo:**
+### Modo Producción (Servicio de Alertas)
+Levanta el servicio de monitoreo continuo (ejecución cada 30 min):
+
 ```bash
-python src/main.py
+python src/deploy.py
 ```
 
----
-
-## Limitaciones Actuales
-
-### Calidad de Datos
-- **Problema:** Los datos actuales presentan limitaciones de precisión
-- **Impacto:** Las predicciones pueden no reflejar con exactitud patrones reales
-- **Causa raíz:** 
-  - Posible inconsistencia en la recopilación de datos de dispositivos
-  - Insuficiente cantidad de datos históricos
-  - Variabilidad en la calidad de sensores
-
-### Precisión del Modelo
-- Las métricas de evaluación sugieren necesidad de mejora
-- El modelo base es funcional pero requiere optimización
+> Se recomienda usar **pm2** para mantener el proceso activo en el servidor.
 
 ---
 
-## Próximos Pasos Recomendados
+## ⚠️ Limitaciones Conocidas
 
-### Prioridad Alta: Mejora de Datos
+**Ruido en Sensores**  
+Se han detectado dispositivos que reportan picos de CO₂ físicamente imposibles superiores a **55,000 ppm**.  
+El sistema aplica filtros de rango, pero se sugiere revisión técnica del hardware.
 
-1. **Auditoría de Calidad de Datos**
-   - [ ] Analizar distribución de valores por variable
-   - [ ] Identificar outliers y valores atípicos
-   - [ ] Verificar consistencia temporal en las lecturas
-   - [ ] Documentar patrones de datos faltantes
-
-2. **Incremento de Dataset**
-   - [ ] Recopilar más datos históricos (mínimo 6-12 meses)
-   - [ ] Aumentar frecuencia de muestreo si es posible
-   - [ ] Incorporar datos de más dispositivos para diversidad
-
-3. **Validación de Sensores**
-   - [ ] Verificar calibración de dispositivos Skiliket
-   - [ ] Implementar controles de calidad en la recopilación
-   - [ ] Establecer protocolos de mantenimiento preventivo
-
-### Mejora del Modelo
-
-4. **Feature Engineering**
-   - [ ] Crear variables derivadas (promedios móviles, tendencias)
-   - [ ] Incorporar variables temporales (hora del día, día de semana, estacionalidad)
-   - [ ] Generar interacciones entre variables ambientales
-
-5. **Optimización de Hiperparámetros**
-
-   - [ ] Implementar búsqueda de hiperparámetros
-   - [ ] Documentar configuración óptima encontrada
-
-7. **Experimentación con Modelos Alternativos**
-   - [ ] Probar LightGBM (alternativa a XGBoost)
-   - [ ] Experimentar con Random Forest como baseline
-   - [ ] Considerar modelos específicos para series temporales:
-     - LSTM/GRU (redes neuronales recurrentes)
-     - Prophet (Facebook)
-     - ARIMA/SARIMA (modelos clásicos)
-   - [ ] Implementar ensemble de modelos
-
-### Evaluación y Métricas
-
-7. **Sistema de Métricas Robusto**
-   - [ ] Definir métricas de negocio (no solo técnicas)
-   - [ ] Implementar backtesting en ventanas temporales
-   - [ ] Crear sistema de monitoreo de drift de datos
-   - [ ] Establecer benchmarks y objetivos claros
-
-8. **Validación del Sistema de Alertas**
-   - [ ] Calibrar umbrales con expertos del dominio
-   - [ ] Medir tasa de falsos positivos/negativos
-   - [ ] Implementar sistema de feedback de usuarios
-   - [ ] Ajustar sensibilidad según criticidad
-
-### Mejoras en el Dashboard
-
-9. **Funcionalidades Adicionales**
-   - [ ] Agregar intervalos de confianza a predicciones
-   - [ ] Mostrar importancia de features
-   - [ ] Implementar comparación histórico vs predicho
-   - [ ] Agregar exportación de reportes (PDF/Excel)
-
-10. **Experiencia de Usuario**
-    - [ ] Agregar filtros por dispositivo y periodo
-    - [ ] Incluir explicaciones interpretables (SHAP values)
-    - [ ] Crear tutoriales interactivos
-    - [ ] Implementar modo oscuro/claro
-
-###  Documentación
-
-11. **Documentación Técnica**
-    - [ ] Documentar decisiones de arquitectura
-    - [ ] Crear guía de contribución
-    - [ ] Documentar API de modelos
-    - [ ] Escribir casos de prueba
-
-12. **Documentación de Usuario**
-    - [ ] Manual de usuario del dashboard
-    - [ ] Guía de interpretación de alertas
-    - [ ] FAQs y troubleshooting
-    - [ ] Videos demostrativos
+**Intermitencia de Datos**  
+No todos los sensores registran todos los parámetros de manera consistente, lo que puede afectar la confiabilidad de las predicciones en ciertas zonas.
 
 ---
 
-## Contribución
+## 🗺️ Roadmap y Próximos Pasos
 
-**Áreas prioritarias para contribución:**
-- Mejora de calidad de datos
-- Optimización de modelos
-- Nuevas visualizaciones en dashboard
-- Tests unitarios
-- Documentación
+- [ ] **Datos**: Incrementar el dataset histórico para capturar mejor la estacionalidad.  
+- [ ] **Modelo**: Ajuste fino de los umbrales de alerta.  
+- [ ] **Infraestructura**: Desacoplar el dashboard de la lógica de inferencia para mayor escalabilidad.  
+- [ ] **Hardware**: Calibración física de la red de sensores.
 
 ---
 
-## 📄 Licencia
+## 👥 Contribución
 
-[Especificar licencia del proyecto]
+Este proyecto fue desarrollado por el **Equipo A5** como parte del **Servicio Social – Invierno 2026**.
 
----
+- Ángel Esparza Enríquez
+- Francisco Alejandro Delgado García
+- Víctor Alejandro Rojas Gámez
+- Valeria Flores Medina  
 
+**Estado:** 🟢 Funcional / En Mantenimiento
 
 **Versión:** 1.0.0  
 **Última actualización:** Febrero 2026  
